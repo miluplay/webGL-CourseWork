@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<title>Rotating triangle</title>
+
+<link rel="stylesheet" type="text/css" href="easy.css">
+<script rel="script" src="DrawTriangle.js"></script>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform float theta;
+
+void main()
+{
+    float s = sin( theta );
+    float c = cos( theta );
+
+    gl_Position.x = -s * vPosition.y + c * vPosition.x;
+    gl_Position.y =  s * vPosition.x + c * vPosition.y;
+    gl_Position.z = 0.0;
+    gl_Position.w = 1.0;
+}
+
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+void main()
+{
+    gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+}
+
+
+
+
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Triangle.js"></script>
+</head>
+
+<body>
+<button id="Direction">Change Rotation Direction</button>
+
+<select id="Controls" size="3">
+  <option value="0">Toggle Rotation Direction</option>
+  <option value="1">Spin Faster</option>
+  <option value="2">Spin Slower</option>
+</select>
+
+<canvas id="mytriangle1" width="256" height="256" style="display:none;">
+  Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+<ul id="rightMenu" style="width: 60px;">
+  <li>Triangle1</li>
+  <li style="text-align: center"><input type="button" value="红色" onclick="drawTriangle1('red')"></li>
+  <li style="text-align: center"><input type="button" value="黄色" onclick="drawTriangle1('yellow')"></li>
+  <li style="text-align: center"><input type="button" value="绿色" onclick="drawTriangle1('green')"></li>
+  <li style="text-align: center"><input type="button" value="蓝色" onclick="drawTriangle1('blue')"></li>
+  <li>Triangle2</li>
+  <li style="text-align: center"><input type="button" value="红色" onclick="drawMid('red')"></li>
+  <li style="text-align: center"><input type="button" value="黄色" onclick="drawMid('yellow')"></li>
+  <li style="text-align: center"><input type="button" value="绿色" onclick="drawMid('green')"></li>
+  <li style="text-align: center"><input type="button" value="蓝色" onclick="drawMid('blue')"></li>
+  <li>Triangle3</li>
+  <li style="text-align: center"><input type="button" value="红色" onclick="drawSml('red')"></li>
+  <li style="text-align: center"><input type="button" value="黄色" onclick="drawSml('yellow')"></li>
+  <li style="text-align: center"><input type="button" value="绿色" onclick="drawSml('green')"></li>
+  <li style="text-align: center"><input type="button" value="蓝色" onclick="drawSml('blue')"></li>
+</ul>
+<!--<script src="js/three.js"></script>-->
+<script>
+  var rm = document.getElementById("rightMenu");
+  document.documentElement.oncontextmenu = function (e) {
+    //显示我们自己定义的右键菜单
+    //1.找到菜单
+    //提取到函数外面作为全局变量
+
+    //兼容Event对象
+    e = e || window.event;
+
+    //2.设置菜单的位置等于鼠标的坐标
+    //判断：如果鼠标的位置+菜单的宽度>网页的宽度，那么就改为右边定位
+    //鼠标坐标
+    var mx = e.clientX;
+    var my = e.clientY;
+    //菜单宽度
+    var rmWidth = parseInt(rm.style.width);
+    //网页的宽度(高度用同样的方法解决)
+    var pageWidth = document.documentElement.clientWidth;
+    //console.log(pageWidth);
+    if ((mx + rmWidth) < pageWidth) {
+      rm.style.left = mx + "px";
+      rm.style.top = my + "px";
+    } else {
+      rm.style.right = mx + "px";
+      rm.style.top = my + "px";
+    }
+
+    //3.显示右键菜单
+    rm.style.display = "block";
+
+    //阻止默认的右键菜单显示
+    return false;
+  };
+
+  //不需要积隐藏右键菜单
+  document.documentElement.onclick = function () {
+    rm.style.display = "none";
+  }
+</script>
+
+<script>
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  var triangleShape = new THREE.Shape();
+  triangleShape.moveTo(0, 0);
+  // 开始划线
+  triangleShape.lineTo(0, 0);
+  triangleShape.lineTo(0, 0);
+  triangleShape.lineTo(0, 0);
+  var geometry = new THREE.ShapeGeometry(triangleShape);
+
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  var material = new THREE.MeshBasicMaterial({
+    color: 'black',
+    side: THREE.DoubleSide
+  });
+  var cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+  camera.position.z = 105;
+
+  var direction = 1;
+  var animate = function () {
+
+    requestAnimationFrame(animate);
+    cube.rotateZ(Math.PI / 200 * (direction));
+    renderer.render(scene, camera);
+  };
+
+  animate();
+
+  var xposition = 0;
+  var yposition = 0;
+
+
+
+  var drawMid = function (color) {
+
+    var triangleShape2 = new THREE.Shape();
+    triangleShape2.moveTo(xposition, yposition);
+    // 开始划线
+    triangleShape2.lineTo(xposition - 10, yposition - 10);
+    triangleShape2.lineTo(xposition + 10, yposition - 10);
+    triangleShape2.lineTo(xposition, yposition);
+    var geometry2 = new THREE.ShapeGeometry(triangleShape2);
+    var material2 = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide
+    });
+    var cube2 = new THREE.Mesh(geometry2, material2);
+    scene.add(cube2);
+
+    function runder() {
+      renderer.render(scene, camera);
+      cube2.rotateX(Math.PI / 200 * (direction));
+      requestAnimationFrame(runder);
+    }
+
+    runder();
+
+  }
+
+  var drawSml = function (color) {
+
+    var triangleShape1 = new THREE.Shape();
+    triangleShape1.moveTo(xposition, yposition);
+    // 开始划线
+    triangleShape1.lineTo(xposition - 5, yposition - 5);
+    triangleShape1.lineTo(xposition + 5, yposition - 5);
+    triangleShape1.lineTo(xposition, yposition);
+    var geometry1 = new THREE.ShapeGeometry(triangleShape1);
+    var material1 = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide
+    });
+    var cube1 = new THREE.Mesh(geometry1, material1);
+    scene.add(cube1);
+
+    function runder() {
+      renderer.render(scene, camera);
+      cube1.rotateY(Math.PI / 200 * (direction));
+      requestAnimationFrame(runder);
+    }
+
+    runder();
+
+  }
+
+
+  function setEventsMouse() {
+    //点击了鼠标左键
+    window.addEventListener('click', function (e) {
+      if (e.button === 0) {
+        console.log("点击了鼠标左键");
+      }
+    });
+
+    //点击了鼠标右键
+    window.addEventListener('contextmenu', function (e) {
+      function convertTo3DCoordinate(clientX, clientY) {
+        var mv = new THREE.Vector3(
+          (clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1,
+          0.5);
+        mv.unproject(this.camera); //这句将一个向量转成threejs坐标
+        return mv;
+      }
+
+      if (e.button === 2) {
+
+        xy = convertTo3DCoordinate(e.x, e.y);
+        xposition = xy.x * 300;
+        yposition = xy.y * 300;
+        console.log(xposition, yposition);
+
+      }
+
+    });
+
+    //鼠标移动坐标2D坐标
+    window.addEventListener('mousemove', function (e) {
+      // console.log('x:'+e.x);
+      // console.log('y:'+e.y);
+    });
+
+  }
+
+  function setKeyEvents() {
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'KeyW') {
+
+        if (direction === 1) {
+          direction = -1;
+        } else {
+          direction = 1;
+        }
+      }
+      if (e.code === 'KeyS') {
+        direction = 0;
+      }
+    });
+  }
+
+  setEventsMouse();
+  setKeyEvents();
+</script>
+
+
+</body>
+
+</html>

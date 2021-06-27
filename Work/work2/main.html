@@ -1,0 +1,180 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>三角形</title>
+  <style>
+      body {
+          margin: 0;
+      }
+
+      canvas {
+          width: 100%;
+          height: 100%
+      }
+
+      #rightMenu {
+          list-style: none;
+          background: gainsboro;
+          border: solid 1px darkgrey;
+          margin: 0px;
+          padding: 5px;
+          position: absolute;
+          top: 0px;
+          display: none;
+      }
+
+      #rightMenu li {
+          border-bottom: solid 1px darkgrey;
+      }
+
+  </style>
+</head>
+<body>
+<ul id="rightMenu" style="width: 100px;">
+  <li style="text-align: center"><input type="button" value="珊瑚红" onclick="drawTriangle('darksalmon')"></li>
+  <li style="text-align: center"><input type="button" value="明黄色" onclick="drawTriangle('yellow')"></li>
+  <li style="text-align: center"><input type="button" value="青绿色" onclick="drawTriangle('aquamarine')"></li>
+  <li style="text-align: center"><input type="button" value="海蓝色" onclick="drawTriangle('dodgerblue')"></li>
+  <li style="text-align: center"><input type="button" value="浅蓝色" onclick="drawTriangle('azure')"></li>
+</ul>
+<script src="three.js"></script>
+<script>
+  var rm = document.getElementById("rightMenu");
+  document.documentElement.oncontextmenu = function (e) {
+    e = e || window.event;
+    var mx = e.clientX;
+    var my = e.clientY;
+    var rmWidth = parseInt(rm.style.width);
+    var pageWidth = document.documentElement.clientWidth;
+    //console.log(pageWidth);
+    if ((mx + rmWidth) < pageWidth) {
+      rm.style.left = mx + "px";
+      rm.style.top = my + "px";
+    } else {
+      rm.style.right = mx + "px";
+      rm.style.top = my + "px";
+    }
+    rm.style.display = "block";
+    return false;
+  };
+
+  //不需要时隐藏右键菜单
+  document.documentElement.onclick = function () {
+    rm.style.display = "none";
+  }
+</script>
+
+
+<script>
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  var triangleShape = new THREE.Shape();
+  triangleShape.moveTo(0, 0);
+  triangleShape.lineTo(0, 0);
+  triangleShape.lineTo(0, 0);
+  triangleShape.lineTo(0, 0);
+  var geometry = new THREE.ShapeGeometry(triangleShape);
+  var material = new THREE.MeshBasicMaterial({
+    color: 'black',
+    side: THREE.DoubleSide
+  });
+  var cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+  camera.position.z = 105;
+
+  var direction = 1;
+  var animate = function () {
+
+    requestAnimationFrame(animate);
+    cube.rotateZ(Math.PI / 200 * (direction));
+    renderer.render(scene, camera);
+  };
+
+  animate();
+
+  var xposition = 0;
+  var yposition = 0;
+
+  var drawTriangle = function (color) {
+
+    var triangleShape3 = new THREE.Shape();
+    triangleShape3.moveTo(xposition, yposition);
+    // 开始划线
+    triangleShape3.lineTo(xposition - 20, yposition - 20);
+    triangleShape3.lineTo(xposition + 20, yposition - 20);
+    triangleShape3.lineTo(xposition, yposition);
+    var geometry3 = new THREE.ShapeGeometry(triangleShape3);
+    var material3 = new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide
+    });
+    var cube3 = new THREE.Mesh(geometry3, material3);
+    scene.add(cube3);
+
+    function runder() {
+      renderer.render(scene, camera);
+      cube3.rotateZ(Math.PI / 200 * (direction));
+      requestAnimationFrame(runder);
+    }
+
+    runder();
+
+  }
+
+  function setEventsMouse() {
+    //点击了鼠标左键
+    window.addEventListener('click', function (e) {
+      if (e.button === 0) {
+        console.log("点击了鼠标左键");
+      }
+    });
+
+    //点击了鼠标右键
+    window.addEventListener('contextmenu', function (e) {
+      function convertTo3DCoordinate(clientX, clientY) {
+        var mv = new THREE.Vector3(
+          (clientX / window.innerWidth) * 2 - 1,
+          -(clientY / window.innerHeight) * 2 + 1,
+          0.5);
+        mv.unproject(this.camera);   //这句将一个向量转成threejs坐标
+        return mv;
+      }
+
+      if (e.button === 2) {
+        xy = convertTo3DCoordinate(e.x, e.y);
+        xposition = xy.x * 300;
+        yposition = xy.y * 300;
+        console.log(xposition, yposition);
+      }
+    });
+  }
+
+  function setKeyEvents() {
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'KeyW') {
+
+        if (direction === 1) {
+          direction = -1;
+        } else {
+          direction = 1;
+        }
+      }
+      if (e.code === 'KeyS') {
+        direction = 0;
+      }
+    });
+  }
+
+  setEventsMouse();
+  setKeyEvents();
+</script>
+</body>
+</html>
+
+
+<!-- w方向 -->
+<!-- s停止 -->
