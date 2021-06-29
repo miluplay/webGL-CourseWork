@@ -16,26 +16,20 @@ var mousePos = { x: 0, y: 0 };
 
 function init() {
   canvas = document.getElementById("canvas");
-  canvas.width  = canvas.clientWidth;
+  canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
-  gl = canvas.getContext("webgl", { preserveDrawingBuffer: true, alpha: true });
+  gl = canvas.getContext("webgl", {
+    preserveDrawingBuffer: true,  // 缓冲区保留
+    alpha: true                   // 包含alpha通道，背景透明
+  });
 
-  if(gl === null)
-    alert("could not initialize WebGL");
+  if (gl === null)
+    alert("WebGL初始化失败");
 
   if (!gl.getExtension("OES_texture_float")) {
     console.error("No OES_texture_float support");
   }
-
-  // if (!gl.getExtension("EXT_color_buffer_float")) {
-  //     console.error("FLOAT color buffer not available");
-  //     document.body.innerHTML = "This example requires EXT_color_buffer_float which is unavailable on this system.";
-  // }
-  // if (!gl.getExtension("OES_texture_float_linear")) {
-  //     console.error("FLOAT color buffer not available");
-  //     document.body.innerHTML = "This example requires EXT_color_buffer_float which is unavailable on this system.";
-  // }
 
   createComputeFramebuffer();
 
@@ -44,16 +38,16 @@ function init() {
 
   render();
 
-  window.addEventListener("mousemove", function(e) {
+  window.addEventListener("mousemove", function (e) {
     let cbr = canvas.getBoundingClientRect();
 
     mousePos.x = e.clientX - cbr.left;
-    if(mousePos.x < 0) mousePos.x = 0;
-    if(mousePos.x > canvas.width) mousePos.x = canvas.width;
+    if (mousePos.x < 0) mousePos.x = 0;
+    if (mousePos.x > canvas.width) mousePos.x = canvas.width;
 
     mousePos.y = (innerHeight - e.clientY) - (innerHeight - cbr.bottom);
-    if(mousePos.y < 0) mousePos.y = 0;
-    if(mousePos.y > canvas.height) mousePos.y = canvas.height;
+    if (mousePos.y < 0) mousePos.y = 0;
+    if (mousePos.y > canvas.height) mousePos.y = canvas.height;
   });
 }
 
@@ -120,14 +114,14 @@ function createComputeFramebuffer() {
 function createComputeProgram() {
   var Program = getShader(computeVert, computeFrag);
 
-  Program.aPosition    = gl.getAttribLocation(Program, "aPosition");
+  Program.aPosition = gl.getAttribLocation(Program, "aPosition");
 
-  Program.uPrevBuffer  = gl.getUniformLocation(Program, "uPrevBuffer");
-  Program.uPebbles     = gl.getUniformLocation(Program, "uPebbles");
-  Program.uNoise       = gl.getUniformLocation(Program, "uNoise");
-  Program.uTime        = gl.getUniformLocation(Program, "uTime");
-  Program.uResolution  = gl.getUniformLocation(Program, "uResolution");
-  Program.uMouse       = gl.getUniformLocation(Program, "uMouse");
+  Program.uPrevBuffer = gl.getUniformLocation(Program, "uPrevBuffer");
+  Program.uPebbles = gl.getUniformLocation(Program, "uPebbles");
+  Program.uNoise = gl.getUniformLocation(Program, "uNoise");
+  Program.uTime = gl.getUniformLocation(Program, "uTime");
+  Program.uResolution = gl.getUniformLocation(Program, "uResolution");
+  Program.uMouse = gl.getUniformLocation(Program, "uMouse");
 
   Program.pebblesTexture = getTexture("assets/textures/pebbles.jpg");
 
